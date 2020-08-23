@@ -1,29 +1,15 @@
 # -*- coding: utf-8 -*-
-from flask import Flask, render_template
-from flask_socketio import SocketIO, emit
+import os
+from app import create_app
+from dotenv import load_dotenv
 
 
-app = Flask(__name__)
-app.config['ENV'] = 'development'
-app.config['SECRET_KEY'] = 'my_secret'
-app.config['DEBUG'] = True
-socketio = SocketIO(app)
+# Load dotenv in the base root
+root_path = os.path.dirname(os.path.abspath(__file__))
+load_dotenv(dotenv_path=os.path.join(root_path, '.env'), override=True)
 
-
-@app.route('/')
-def index():
-    return render_template('index.html')
-
-
-@socketio.on('connect', namespace='/test')
-def test_connect():
-    emit('my response', {'data': 'Connected'})
-
-
-@socketio.on('message')
-def handle_message(message):
-    print('received message: ' + str(message))
+app = create_app()
 
 
 if __name__ == '__main__':
-    socketio.run(app, host='0.0.0.0')
+    app.run(host='0.0.0.0', port=5000)

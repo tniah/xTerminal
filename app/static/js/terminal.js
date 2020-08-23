@@ -105,7 +105,6 @@ var Terminal = Terminal || function(headerContainer, cmdLineContainer, outputCon
     }
   }
 
-  //
   function formatColumns_(entries) {
     var maxName = entries[0].name;
     util.toArray(entries).forEach(function(entry, i) {
