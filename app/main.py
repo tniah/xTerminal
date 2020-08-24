@@ -1,6 +1,10 @@
 # -*- coding: utf-8 -*-
-from flask import Flask, render_template
+import os
+import logging
+import logging.handlers
+from flask import Flask
 from .extensions import socketio
+from .core import bp as index_bp
 
 
 def create_app(environment=None):
@@ -28,7 +32,20 @@ def __init_extensions(app):
 
 
 def __register_routes(app):
+    app.register_blueprint(blueprint=index_bp)
 
-    @app.route('/')
-    def index():
-        return render_template('index.html')
+
+def __config_logging(app):
+    """ Config logging for Flask application. """
+    if app.config['ENV'] == 'production':
+        fmt = '%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]'
+        formatter = logging.Formatter(fmt=fmt)
+        info_log = os.path.join(app.config['LOG_FOLDER'], 'app-info.log')
+        info_log_handler = logging.handlers.RotatingFileHandler(
+            filename=info_log,
+            maxBytes=1024**2,
+            backupCount=10)
+        info_log_handler.setLevel(level=logging.INFO)
+        info_log_handler.setFormatter(fmt=formatter)
+        app.logger.addHandler(info_log_handler)
+    app.logger.setLevel(logging.INFO)
