@@ -11,11 +11,17 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+"""Handlers for Logout endpoint."""
+from flask import Blueprint
+from flask import redirect
+from flask import session
+from flask import url_for
 
-DEBUG = False
-TESTING = False
-SECRET_KEY = 'xTerminal'
-GOOGLE_CLIENT_ID = '340331373509-o0g66ndejb72kqvkqeifmrluqf2d6uhe.apps.googleusercontent.com'
-GOOGLE_CLIENT_SECRET = 'ULJILUQEXbTOtrNuNfJ_c-2Q'
-LOGFILE = 'app.log'
-ALLOWED_EMAILS = ['hai.nt@teko.vn']
+logout_view = Blueprint('logout_view', __name__)
+
+
+@logout_view.route('/logout')
+def logout():
+    """Handler for logout."""
+    session.pop('email', None)
+    return redirect(url_for('login_view.login'))

@@ -16,12 +16,13 @@ import os
 
 import jwt
 from flask import Flask
-from flask import session, abort
+from flask import session
 
 import config
 from xterminal.extensions import gLogin
 from xterminal.views.home import home_view
 from xterminal.views.login import login_view
+from xterminal.views.logout import logout_view
 
 
 def create_app(config_file=None):
@@ -62,6 +63,7 @@ def create_app(config_file=None):
     # Register blueprints
     app.register_blueprint(login_view)
     app.register_blueprint(home_view)
+    app.register_blueprint(logout_view)
 
     return app
 
