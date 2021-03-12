@@ -1,0 +1,29 @@
+# Copyright 2021 by TNiaH <kainguyen1509@gmail.com>.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+"""Handlers for Authentication endpoints."""
+from flask import Blueprint
+from flask import render_template
+
+from xterminal.extensions import g_auth
+
+login_view = Blueprint('login_view', __name__)
+
+
+@login_view.route('/login/')
+def login():
+    """Handler for the login page view."""
+    g_button = g_auth.google_login(
+        g_class='google btn d-flex justify-content-center align-items-center',
+        g_icon='fa fa-google')
+    return render_template('login.html', google_login=g_button)

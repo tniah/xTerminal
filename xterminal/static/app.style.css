@@ -1,0 +1,64 @@
+html,
+body {
+    height: 100%;
+    background-color: #3b3b3b;
+}
+
+.login-wrap {
+    position: relative;
+    background: #fff;
+    border-radius: 10px;
+    -webkit-box-shadow: 0px 10px 34px -15px rgba(0, 0, 0, 0.24);
+    -moz-box-shadow: 0px 10px 34px -15px rgba(0, 0, 0, 0.24);
+    box-shadow: 0px 10px 34px -15px rgba(0, 0, 0, 0.24);
+}
+
+.login-wrap h3 {
+    /* font-weight: 700; */
+    font-size: 25px;
+}
+
+.login-wrap img {
+    width: 120px;
+    height: 120px;
+    margin: 0 auto;
+    margin-bottom: 10px;
+}
+
+.social-login a {
+    display: block;
+    text-decoration: none;
+    display: block;
+    position: relative;
+    text-align: center;
+    color: #fff;
+    margin-bottom: 10px;
+}
+
+.social-login a:hover {
+    color: #fff;
+}
+
+.social-login a.facebook {
+    background: #3b5998;
+}
+
+.social-login a.facebook:hover {
+    background: #344e86;
+}
+
+.social-login a.twitter {
+    background: #1da1f2;
+}
+
+.social-login a.twitter:hover {
+    background: #0d95e8;
+}
+
+.social-login a.google {
+    background: #ea4335;
+}
+
+.social-login a.google:hover {
+    background: #e82e1e;
+}
