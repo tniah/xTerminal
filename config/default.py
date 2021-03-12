@@ -18,4 +18,4 @@ SECRET_KEY = 'xTerminal'
 GOOGLE_CLIENT_ID = '340331373509-o0g66ndejb72kqvkqeifmrluqf2d6uhe.apps.googleusercontent.com'
 GOOGLE_CLIENT_SECRET = 'ULJILUQEXbTOtrNuNfJ_c-2Q'
 LOGFILE = 'app.log'
-ALLOWED_EMAILS = ['hai.nt@teko.vn']
+ALLOWED_EMAILS = ['kainguyen1509@gmail.com']
