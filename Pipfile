@@ -8,6 +8,7 @@ flask = "*"
 flask-socketio = "*"
 python-dotenv = "*"
 oauthlib = "*"
+pyjwt = "*"
 
 [dev-packages]
 autopep8 = "*"

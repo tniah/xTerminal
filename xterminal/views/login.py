@@ -15,7 +15,7 @@
 from flask import Blueprint
 from flask import render_template
 
-from xterminal.extensions import g_auth
+from xterminal.extensions import gLogin
 
 login_view = Blueprint('login_view', __name__)
 
@@ -23,7 +23,7 @@ login_view = Blueprint('login_view', __name__)
 @login_view.route('/login/')
 def login():
     """Handler for the login page view."""
-    g_button = g_auth.google_login(
+    g_button = gLogin.google_login(
         g_class='google btn d-flex justify-content-center align-items-center',
         g_icon='fa fa-google')
     return render_template('login.html', google_login=g_button)

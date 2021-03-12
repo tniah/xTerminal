@@ -12,6 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Flask extensions used for the project."""
-from xterminal.extensions.flask_gauth import FlaskGoogleAuth
+from xterminal.extensions.flask_glogin import FlaskGoogleLogin
 
-g_auth = FlaskGoogleAuth()
+gLogin = FlaskGoogleLogin()

@@ -11,30 +11,37 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Flask-GAuth"""
+"""Flask-GoogleLogin"""
 import urllib.request
+from base64 import b64encode
+from urllib.error import HTTPError
 from urllib.parse import urljoin
-import requests
 
+from flask import abort
+from flask import redirect
 from flask import render_template_string
-from flask import request
+from flask import request as flask_req
 from flask import session
 from flask import url_for
+from oauthlib.oauth2 import MismatchingStateError
+from oauthlib.oauth2 import OAuth2Error
 from oauthlib.oauth2 import WebApplicationClient
-from requests.auth import HTTPBasicAuth
 
 
-class FlaskGoogleAuth(object):
+class FlaskGoogleLogin(object):
     """A Flask extension to support authentication with Google."""
 
-    def __init__(self, app=None):
+    def __init__(self, app=None, redirected_endpoint=None, login_endpoint=None):
         self._app = None
         self._client = None
         self._callback_endpoint = 'google_callback'
+        self.redirected_endpoint = redirected_endpoint
+        self.login_endpoint = login_endpoint
+        self.hooks = set()
         if app:
             self.init_app(app)
 
-    def init_app(self, app):
+    def init_app(self, app, redirected_endpoint=None, login_endpoint=None):
         if not app.config.get('GOOGLE_CLIENT_ID'):
             raise RuntimeError(
                 'Missing "GOOGLE_CLIENT_ID" in configuration.')
@@ -51,6 +58,12 @@ class FlaskGoogleAuth(object):
             'https://oauth2.googleapis.com/token')
         app.config.setdefault(
             'GOOGLE_SCOPES', ['email', 'profile', 'openid'])
+
+        if redirected_endpoint is not None:
+            self.redirected_endpoint = redirected_endpoint
+
+        if login_endpoint is not None:
+            self.login_endpoint = login_endpoint
 
         app.add_url_rule(
             '/login/google/callback',
@@ -83,23 +96,56 @@ class FlaskGoogleAuth(object):
             g_class=g_class,
             g_icon=g_icon)
 
+    def _callback(self):
+        try:
+            token_url, headers, body = self._client.prepare_token_request(
+                token_url=self._app.config['GOOGLE_TOKEN_ENDPOINT'],
+                authorization_response=flask_req.url,
+                redirect_url=self._redirect_url,
+                state=session.get('state', True))
+        except MismatchingStateError:
+            return redirect(url_for(self.login_endpoint))
+        except OAuth2Error as e:
+            self._app.logger.warning(
+                'Error while preparing token request: %s' % e)
+            return abort(500)
+
+        headers.update({
+            'Accept': 'application/json',
+            'Authorization': self._basic_auth_string
+        })
+        req = urllib.request.Request(
+            token_url,
+            data=body.encode('utf-8'),
+            headers=headers,
+            method='POST')
+        try:
+            r = urllib.request.urlopen(req)
+            data = self._client.parse_request_body_response(r.read())
+        except HTTPError as e:
+            err_msg = e.read().decode()
+            self._app.logger.warning(
+                'Error while fetching token: HTTP_STATUS_CODE_%s (%s)' % (
+                    e.code, err_msg))
+            return abort(500)
+
+        for hook in self.hooks:
+            hook(data)
+        return redirect(url_for(self.redirected_endpoint))
+
     @property
     def _redirect_url(self):
         redirect_url = urljoin(
-            request.url_root, url_for(self._callback_endpoint))
+            flask_req.url_root, url_for(self._callback_endpoint))
         return redirect_url
 
-    def _callback(self):
-        token_url, _, body = self._client.prepare_token_request(
-            token_url=self._app.config['GOOGLE_TOKEN_ENDPOINT'],
-            authorization_response=request.url,
-            redirect_url=self._redirect_url)
-        auth = HTTPBasicAuth(
-            self._app.config['GOOGLE_CLIENT_ID'],
-            self._app.config['GOOGLE_CLIENT_SECRET'])
-        headers = {
-            'Accept': 'application/json',
-            'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
-        }
-        resp = requests.post(token_url, headers=headers, auth=auth, data=body)
-        print(resp.json())
+    @property
+    def _basic_auth_string(self):
+        return 'Basic ' + b64encode(b':'.join((
+            self._app.config['GOOGLE_CLIENT_ID'].encode('latin1'),
+            self._app.config['GOOGLE_CLIENT_SECRET'].encode('latin1'))
+        )).strip().decode('ascii')
+
+    def register_hook(self, hook):
+        """Registers a hook for token response."""
+        self.hooks.add(hook)

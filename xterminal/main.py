@@ -14,10 +14,12 @@
 """Entry point for the application."""
 import os
 
+import jwt
 from flask import Flask
+from flask import session, abort
 
 import config
-from xterminal.extensions import g_auth
+from xterminal.extensions import gLogin
 from xterminal.views.home import home_view
 from xterminal.views.login import login_view
 
@@ -43,7 +45,19 @@ def create_app(config_file=None):
     configure_logger(app)
 
     # Initialize Flask extensions
-    g_auth.init_app(app)
+    def parse_token_response(data):
+        payload = jwt.decode(
+            data.get('id_token'),
+            options={'verify_signature': False})
+
+        if 'email' in payload:
+            session['email'] = payload['email']
+
+    gLogin.init_app(
+        app,
+        redirected_endpoint='home_view.index',
+        login_endpoint='login_view.login')
+    gLogin.register_hook(parse_token_response)
 
     # Register blueprints
     app.register_blueprint(login_view)

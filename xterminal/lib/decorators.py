@@ -11,11 +11,26 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+"""Implements decorators for the xTerminal application."""
+from functools import wraps
 
-DEBUG = False
-TESTING = False
-SECRET_KEY = 'xTerminal'
-GOOGLE_CLIENT_ID = ''
-GOOGLE_CLIENT_SECRET = ''
-LOGFILE = 'app.log'
-ALLOWED_EMAILS = []
+from flask import abort
+from flask import current_app
+from flask import redirect
+from flask import session
+from flask import url_for
+
+
+def login_required(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        if 'email' not in session:
+            return redirect(url_for('login_view.login'))
+
+        email = session['email']
+        if email not in current_app.config['ALLOWED_EMAILS']:
+            return abort(403)
+
+        return func(*args, **kwargs)
+
+    return wrapper

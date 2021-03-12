@@ -14,10 +14,12 @@
 """Handlers for Home endpoints."""
 from flask import Blueprint
 from flask import render_template
+from xterminal.lib.decorators import login_required
 
 home_view = Blueprint('home_view', __name__)
 
 
 @home_view.route('/')
+@login_required
 def index():
     return render_template('index.html')
